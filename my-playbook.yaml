@@ -1,0 +1,56 @@
+---
+- name: disable known hosts fingerrprint
+  hosts: 127.0.0.1
+  become: yes
+  tasks:
+  - name: disable known hosts fingerrprint
+    shell:
+      cmd:  sudo echo -e "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+
+- name: share the pub key in the cluster
+  hosts: all
+  become: yes  
+  tasks:    
+  - name: Copy SSh Key | copying shh key to remote host
+    authorized_key:
+      user: "khalil"
+      state: present
+      key: "{{ lookup('file', '/home/khalil/.ssh/id_rsa.pub') }}"
+
+
+- name: install nginx server
+  hosts: all
+  become: yes
+  tasks:
+  - name: Update APT cache
+    apt:
+      update_cache: yes
+  - name: install nginx
+    apt:
+      name: nginx
+      state: latest
+  - name: start web server
+    service:
+      name: nginx
+      state: started 
+
+- name: install nginx server
+  hosts: 127.0.0.1
+  become: yes
+  tasks:
+  - name: Update APT cache
+    apt:
+      update_cache: yes
+  - name: install nginx
+    apt:
+      name: nginx
+      state: latest
+  - name: start web server
+    service:
+      name: nginx
+      state: started
+  - name: Docker Installation
+    apt:
+      name: docker.io
+      state: present
+      update_cache: true
